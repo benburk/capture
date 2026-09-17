@@ -3,6 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    # yt-dlp only: YouTube breaks extraction faster than a release
+    # channel updates, and a stale one fails in the worst way -- 403 on
+    # every adaptive stream, leaving a video capture holding metadata
+    # and no video.
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -10,12 +15,14 @@
     {
       self,
       nixpkgs,
+      nixpkgs-unstable,
       flake-utils,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        unstable = nixpkgs-unstable.legacyPackages.${system};
         # Binaries the pipeline shells out to; wrapped onto PATH so an
         # installed capture works outside the devShell.
         runtime = with pkgs; [
@@ -23,7 +30,7 @@
           single-file-cli
           pandoc
           dprint
-          yt-dlp
+          unstable.yt-dlp
           ffmpeg
           git
           poppler-utils
@@ -75,7 +82,7 @@
             single-file-cli
             chromium
             pandoc
-            yt-dlp
+            unstable.yt-dlp
             ffmpeg
             git
             poppler-utils
