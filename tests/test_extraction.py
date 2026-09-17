@@ -365,6 +365,23 @@ def test_discussions_sorts_across_sources_and_drops_self(monkeypatch):
     assert disc.discussions(hn) == ["https://www.reddit.com/r/a/comments/b/c/"]
 
 
+def test_discussions_keep_every_hn_submission_of_one_url(monkeypatch):
+    import capture.discussions as disc
+
+    # A URL submitted twice: the thread that caught fire, and a repost
+    # two years later that drew its own crowd. Both discuss the page.
+    first = "https://news.ycombinator.com/item?id=35294111"
+    repost = "https://news.ycombinator.com/item?id=43036903"
+    monkeypatch.setattr(
+        disc, "hackernews_threads", lambda u: [(first, 49), (repost, 20)]
+    )
+    monkeypatch.setattr(disc, "reddit_threads", lambda u: [])
+    # Deduplicating on a key that drops the query makes every HN thread
+    # the same thread, keeping only the richest and silently discarding
+    # the reposts this source exists to find.
+    assert disc.discussions("https://pubby.games/codegen.html") == [first, repost]
+
+
 def test_discussions_survive_a_dead_source(monkeypatch):
     import capture.discussions as disc
 

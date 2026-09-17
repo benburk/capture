@@ -23,6 +23,9 @@ from capture.resolvers.base import FetchError, fetch_html
 ALGOLIA = "https://hn.algolia.com/api/v1/search"
 ARCTIC_SHIFT = "https://arctic-shift.photon-reddit.com/api"
 LOBSTERS = "https://lobste.rs"
+# Every HN thread is this path with an `id` query, which is why thread
+# identity cannot be left to `normalize`. See `_thread_key`.
+HN_ITEM = "news.ycombinator.com/item"
 
 # Bots mirror the HN front page into these subreddits. Their threads
 # are usually too quiet to clear MIN_COMMENTS anyway, but a mirror of a
@@ -85,12 +88,29 @@ def discussions(url: str, title: str = "") -> list[str]:
     threads.sort(key=lambda t: (-t[1], t[0]))
     # A captured thread is not a discussion OF itself: capturing an HN
     # or reddit page finds that page in its own source.
-    seen, ordered = {normalize(url)}, []
+    seen, ordered = {_thread_key(url)}, []
     for thread_url, _ in threads:
-        if normalize(thread_url) not in seen:
-            seen.add(normalize(thread_url))
+        if _thread_key(thread_url) not in seen:
+            seen.add(_thread_key(thread_url))
             ordered.append(thread_url)
     return ordered
+
+
+def _thread_key(url: str) -> str:
+    """What makes a thread the same thread, for deduplication.
+
+    `normalize` drops the query, which is right for tracking params and
+    wrong for Hacker News, where `item?id=N` is the entire identity. By
+    that key every HN thread is the same thread, so a URL's second
+    submission looked like a duplicate of its first and was dropped --
+    discarding precisely the reposts `hackernews_threads` goes looking
+    for. Reddit and lobsters carry their ids in the path already.
+    """
+    key = normalize(url)
+    if key != HN_ITEM:
+        return key
+    item = re.search(r"(?:^|&)id=([^&]+)", urllib.parse.urlparse(url).query)
+    return f"{key}?id={item.group(1)}" if item else key
 
 
 def hackernews_threads(url: str) -> list[tuple[str, int]]:
