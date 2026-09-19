@@ -51,6 +51,27 @@
               --replace-fail "CHANNEL = 'stable'" "CHANNEL = 'nightly'"
           '';
         });
+        # YouTube serves age-restricted videos as a single 360p stream
+        # unless the request carries a proof-of-origin token (yt-dlp
+        # #17542). Minting one means running Google's BotGuard JS, which
+        # yt-dlp delegates to a provider plugin: python plugin, bundled
+        # script, and a node to run it. Wrapping yt-dlp rather than
+        # teaching the pipeline about any of it keeps the call site
+        # plain `yt-dlp`, and leaves the tokens off for everything that
+        # does not need them -- an unused extractor arg costs nothing.
+        potProvider = unstable.python314Packages.bgutil-ytdlp-pot-provider;
+        yt-dlp-pot = pkgs.symlinkJoin {
+          name = "yt-dlp-pot-${yt-dlp-nightly.version}";
+          paths = [ yt-dlp-nightly ];
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/yt-dlp \
+              --prefix PYTHONPATH : ${potProvider}/${unstable.python314.sitePackages} \
+              --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.nodejs ]} \
+              --add-flags "--extractor-args youtubepot-bgutilscript:script_path=${potProvider}/share/bgutil-ytdlp-pot-provider/build/generate_once.js"
+          '';
+        };
+
         # Binaries the pipeline shells out to; wrapped onto PATH so an
         # installed capture works outside the devShell.
         runtime = with pkgs; [
@@ -58,7 +79,7 @@
           single-file-cli
           pandoc
           dprint
-          yt-dlp-nightly
+          yt-dlp-pot
           ffmpeg
           git
           poppler-utils
@@ -110,7 +131,7 @@
             single-file-cli
             chromium
             pandoc
-            yt-dlp-nightly
+            yt-dlp-pot
             ffmpeg
             git
             poppler-utils
