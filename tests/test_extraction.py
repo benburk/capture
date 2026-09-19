@@ -55,6 +55,19 @@ def test_title_og_with_apostrophe():
     assert page_title(html) == "Baby's first type checker"
 
 
+def test_title_stops_at_a_block_when_the_heading_is_never_closed():
+    # research.swtch.com opens <h1> and never closes it, and the page's
+    # only </h1> sits far below -- so a lazy match ran past the heading
+    # and swept the subtitle, byline, date and URL into the title.
+    html = (
+        "<h1>Minimal Boolean Formulas\n"
+        '<div class="subtitle">(Part 3)</div>'
+        "<div>Russ Cox<br>May 18, 2011</div>"
+        "<p>Posted on Wednesday.</p></h1>"
+    )
+    assert page_title(html, "research.swtch.com") == "Minimal Boolean Formulas"
+
+
 def test_title_prefers_h1_over_title_tag():
     # austinhenley.com/blog/favwikiarticles.html: <title> disagrees with h1
     html = (

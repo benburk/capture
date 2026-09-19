@@ -116,7 +116,15 @@ def page_title(html: str, domain: str = "", url: str = "") -> str:
     # The standard declaration of a site's display name, e.g. sites
     # that title pages "Post Title | Site Name" (dervis.de).
     og_site = meta_content(html, "og:site_name")
-    headings = re.findall(r"<h([12])([^>]*)>(.*?)</h\1>", html, re.S)
+    # An unclosed heading ends at the next block element, not at some
+    # distant </h1>. research.swtch.com never closes its <h1>, and with
+    # `.*?` spanning to the page's only closing tag the "title" swept up
+    # the subtitle, byline, date and URL below it.
+    headings = re.findall(
+        r"<h([12])([^>]*)>(.*?)(?:</h\1>|<(?:div|p|section|article|header|footer|ul|ol|table)\b)",
+        html,
+        re.S,
+    )
     # A class-marked heading is the strongest heading signal: WordPress
     # puts a site-title h1 earlier in the DOM, and Obsidian Publish uses
     # an h2 (publish-article-heading) with no h1 at all. Pagefind's
