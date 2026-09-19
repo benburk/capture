@@ -23,6 +23,34 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         unstable = nixpkgs-unstable.legacyPackages.${system};
+        # The nightly, not the release unstable carries: YouTube breaks
+        # extraction faster than releases repair it, and the failure is
+        # silent-ish -- metadata still resolves while every adaptive
+        # stream 403s, leaving a video capture with no video. Pinned to
+        # the commit the nightly tag was generated from. The same
+        # override lives in dotfiles hosts/common/yt-dlp-nightly.nix;
+        # they are separate flakes, so bumping one does not move the
+        # other.
+        yt-dlp-nightly = unstable.yt-dlp.overridePythonAttrs (old: rec {
+          version = "2026.09.16.232951";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "yt-dlp";
+            repo = "yt-dlp";
+            rev = "c7fb478d21e9e59524befbe23f7801bb267fb880";
+            hash = "sha256-f98zqG5ov/v6EGZxMqeXSRfKegb+XpEMQD/U5oX7F78=";
+          };
+
+          # yt-dlp's CI stamps version.py when cutting a nightly; a plain
+          # checkout still claims the last release. Appended, not
+          # replaced: nixpkgs' own postPatch hardcodes the deno path that
+          # YouTube extraction has needed since 2025.11.12.
+          postPatch = old.postPatch + ''
+            substituteInPlace yt_dlp/version.py \
+              --replace-fail "__version__ = '2026.08.19'" "__version__ = '${version}'" \
+              --replace-fail "CHANNEL = 'stable'" "CHANNEL = 'nightly'"
+          '';
+        });
         # Binaries the pipeline shells out to; wrapped onto PATH so an
         # installed capture works outside the devShell.
         runtime = with pkgs; [
@@ -30,7 +58,7 @@
           single-file-cli
           pandoc
           dprint
-          unstable.yt-dlp
+          yt-dlp-nightly
           ffmpeg
           git
           poppler-utils
@@ -82,7 +110,7 @@
             single-file-cli
             chromium
             pandoc
-            unstable.yt-dlp
+            yt-dlp-nightly
             ffmpeg
             git
             poppler-utils
