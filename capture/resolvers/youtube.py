@@ -50,7 +50,10 @@ def youtube_id(url: str) -> str | None:
 
 
 def yt_dlp(args: list[str]) -> subprocess.CompletedProcess:
-    command = ["yt-dlp", "--no-warnings"]
+    # Warnings stay on: stderr is captured and only printed when
+    # something fails, and the cookie-expiry warning is the one clue
+    # that distinguishes a dead session from a genuinely gated video.
+    command = ["yt-dlp"]
     if YOUTUBE_COOKIES.exists():
         command += ["--cookies", str(YOUTUBE_COOKIES)]
     return subprocess.run(command + args, capture_output=True, text=True)
@@ -91,9 +94,36 @@ def youtube_download(source: str, folder: Path, name: str) -> None:
         ]
     )
     if result.returncode != 0:
-        print(f"video download failed: {result.stderr.strip()[:300]}")
+        raise RuntimeError(download_failure(source, result.stderr))
+    video = folder / f"{name}.mkv"
+    if not video.exists():
+        # A clean exit with no file: the download was skipped rather than
+        # performed, which would otherwise leave a folder holding an
+        # info.json that describes a video it does not contain.
+        raise RuntimeError(f"yt-dlp wrote no video for {source}")
     # Subtitle files were only needed for embedding.
     for stray in folder.glob(f"{name}*.vtt"):
         stray.unlink()
     for stray in folder.glob(f"{name}*.srt"):
         stray.unlink()
+
+
+# yt-dlp's wording when the jar has been rotated out from under it.
+STALE_COOKIES = "cookies are no longer valid"
+
+
+def download_failure(source: str, stderr: str) -> str:
+    """Why the download failed, phrased so the fix is obvious.
+
+    An expired jar surfaces as "Sign in to confirm your age", because a
+    logged-out client is exactly what an age-restricted video refuses --
+    which sends you investigating the video when the session is what
+    died. yt-dlp says which it is in a warning; say it back plainly.
+    """
+    detail = " ".join(stderr.split())[:300]
+    if STALE_COOKIES in stderr:
+        return (
+            f"youtube cookies have expired: refresh {YOUTUBE_COOKIES} "
+            f"and retry {source} ({detail})"
+        )
+    return f"video download failed for {source}: {detail}"

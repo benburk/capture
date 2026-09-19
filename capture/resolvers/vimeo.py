@@ -151,7 +151,11 @@ def vimeo_download(player: str, folder: Path, name: str) -> None:
         ]
     )
     if result.returncode != 0:
-        print(f"video download failed: {result.stderr.strip()[:300]}")
+        detail = " ".join(result.stderr.split())[:300]
+        raise RuntimeError(f"video download failed for {player}: {detail}")
+    video = folder / f"{name}.mkv"
+    if not video.exists():
+        raise RuntimeError(f"yt-dlp wrote no video for {player}")
     # Subtitle files were only needed for embedding.
     for stray in folder.glob(f"{name}*.vtt"):
         stray.unlink()

@@ -382,6 +382,23 @@ def test_discussions_keep_every_hn_submission_of_one_url(monkeypatch):
     assert disc.discussions("https://pubby.games/codegen.html") == [first, repost]
 
 
+def test_download_failure_names_expired_cookies():
+    from capture.resolvers.youtube import download_failure
+
+    # A dead session reaches the user as "Sign in to confirm your age",
+    # because a logged-out client is exactly what an age-restricted
+    # video turns away -- so the error points at the video when the
+    # session is what died. Only yt-dlp's warning tells them apart.
+    stale = (
+        "WARNING: [youtube] The provided YouTube account cookies are no "
+        "longer valid. They have likely been rotated in the browser."
+    )
+    assert "cookies have expired" in download_failure("u", stale)
+    assert "video download failed" in download_failure(
+        "u", "ERROR: [youtube] u: Video unavailable"
+    )
+
+
 def test_discussions_survive_a_dead_source(monkeypatch):
     import capture.discussions as disc
 
