@@ -75,6 +75,11 @@ def youtube_download(source: str, folder: Path, name: str) -> None:
             "--embed-subs",
             "--embed-info-json",
             "--write-info-json",
+            # A --force re-capture means the existing copy is wrong or
+            # stale. Without this yt-dlp keeps it and only the info.json
+            # is rewritten, leaving metadata describing a file that is
+            # not there.
+            "--force-overwrites",
             "--sub-langs",
             "en,en-orig",
             "--write-auto-subs",
