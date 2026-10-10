@@ -94,8 +94,12 @@
           src = self;
           pyproject = true;
           build-system = [ pkgs.python312Packages.hatchling ];
+          # A caller's LD_LIBRARY_PATH outranks Chromium's own rpath; libraries
+          # from a newer nixpkgs (claude-code's wrapper exports alsa-lib) then
+          # demand a glibc Chromium doesn't have. NixOS/nixpkgs#569098.
           makeWrapperArgs = [
             "--prefix PATH : ${pkgs.lib.makeBinPath runtime}"
+            "--unset LD_LIBRARY_PATH"
           ];
           # The fish helper stays package data, invoked by path from
           # pipeline.single_file: `capture` is the one installed command.
