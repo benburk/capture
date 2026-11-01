@@ -1647,3 +1647,20 @@ def test_title_pagefind_meta_h1_beats_masthead_h1():
         page_title(html, "dotat.at", "https://dotat.at/@/2026-08-09-rata-die.html")
         == "Counting the days, revisited"
     )
+
+
+def test_rumble_source_from_url_forms():
+    from capture.resolvers import rumble_source
+
+    page = "https://rumble.com/v40c8ot-sneakos-full-therapy-session-with-healthygamergg.html"
+    assert rumble_source(page) == page
+    assert rumble_source(page + "?e9s=src_v1_ucp") == page
+    assert rumble_source("https://www.rumble.com/v40c8ot-x.html#c") == (
+        "https://rumble.com/v40c8ot-x.html"
+    )
+    assert rumble_source("https://rumble.com/embed/v3xqv2h/?pub=4") == (
+        "https://rumble.com/embed/v3xqv2h/"
+    )
+    assert rumble_source("https://rumble.com/c/SNEAKO") is None
+    # A wayback snapshot of a rumble page belongs to the wayback resolver.
+    assert rumble_source("https://web.archive.org/web/2020/" + page) is None

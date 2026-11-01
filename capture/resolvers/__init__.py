@@ -44,6 +44,7 @@ from capture.resolvers.wayback import (
     wayback_fallback,
     wayback_snapshot,
 )
+from capture.resolvers.rumble import resolve_rumble, rumble_source
 from capture.resolvers.vimeo import resolve_vimeo, vimeo_id
 from capture.resolvers.wikipedia import resolve_wikipedia, wikipedia_article
 from capture.resolvers.youtube import resolve_youtube, youtube_id
@@ -55,6 +56,7 @@ RESOLVERS = [
     resolve_pastebin,
     resolve_youtube,
     resolve_vimeo,
+    resolve_rumble,
     resolve_hackernews,
     resolve_lobsters,
     resolve_reddit,
@@ -106,11 +108,13 @@ __all__ = [
     "resolve_pdf",
     "render_comments",
     "resolve_reddit",
+    "resolve_rumble",
     "resolve_substack",
     "resolve_vimeo",
     "resolve_wayback",
     "resolve_wikipedia",
     "resolve_youtube",
+    "rumble_source",
     "vimeo_id",
     "wayback_fallback",
     "wayback_snapshot",

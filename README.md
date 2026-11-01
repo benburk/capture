@@ -2,7 +2,7 @@
 
 A CLI that saves a URL or local PDF as a self-contained archive folder,
 holding the content in its most faithful form — a single-file HTML copy for
-web pages, the typeset PDF for papers, archival video for YouTube and Vimeo, a git
+web pages, the typeset PDF for papers, archival video for YouTube, Vimeo, and Rumble, a git
 bundle for repos — plus, for anything textual, a markdown conversion with
 YAML frontmatter.
 
@@ -101,6 +101,7 @@ means adding a module under `capture/resolvers/` and registering it in
 | GitHub wiki page            | Raw markdown from the wiki's own git repo, no `.html`: the rendered page only wraps the source in repo chrome. Title from the page name, publish date from the page's first commit.                                                                         |
 | YouTube                     | Archival mkv via [yt-dlp](https://github.com/yt-dlp/yt-dlp) with thumbnail, chapters, subtitles, and info-json embedded, plus a standalone `.info.json`. No markdown: the transcript lives in the embedded subtitles.                                       |
 | Vimeo                       | Same archival mkv + `.info.json` as YouTube, fetched through `player.vimeo.com`: yt-dlp reaches the canonical page through an OAuth endpoint that answers 401. Publish date and uploader name from the oEmbed API, both of which the player endpoint omits. |
+| Rumble                      | Same archival mkv + `.info.json` as YouTube. Rumble's API answers yt-dlp with 403 unless the request carries a browser's TLS fingerprint, so every call passes `--impersonate chrome`. Rumble serves no subtitles.                                          |
 | Reddit thread               | JSON from the [Arctic Shift](https://arctic-shift.photon-reddit.com/) archive rendered as a nested comment tree, since reddit blocks curl, urllib, and headless chromium outright. Scores reflect archive time.                                             |
 | Wayback snapshot            | Content from the toolbar-free `id_` snapshot; naming, frontmatter, and HN lookup use the original URL; the snapshot date bounds undated pages.                                                                                                              |
 | LessWrong / Alignment Forum | The [GreaterWrong](https://www.greaterwrong.com/) mirror, which serves static HTML with the true post date; lesswrong.com's server rendering carries curation timestamps instead.                                                                           |
