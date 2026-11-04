@@ -2,7 +2,7 @@
   description = "Save web pages and PDFs as self-contained archive folders";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     # yt-dlp only: YouTube breaks extraction faster than a release
     # channel updates, and a stale one fails in the worst way -- 403 on
     # every adaptive stream, leaving a video capture holding metadata
@@ -124,6 +124,7 @@
             unset PYTHONPATH
           '';
           packages = with pkgs; [
+            just
             python312
             uv
             ruff
@@ -131,7 +132,7 @@
             dprint
             fd
             ripgrep
-            nixfmt-rfc-style
+            nixfmt
             single-file-cli
             chromium
             pandoc
