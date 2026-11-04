@@ -19,6 +19,9 @@ packages = ["capture"]
 [dependency-groups]
 dev = ["pytest"]
 
+[tool.ruff.lint]
+extend-select = ["I"]
+
 [tool.pyright]
 venvPath = "."
 venv = ".venv"

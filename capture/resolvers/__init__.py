@@ -9,27 +9,17 @@ pipeline.
 
 from capture.resolvers.arxiv import arxiv_id, arxiv_published, resolve_arxiv
 from capture.resolvers.base import FetchError, Resolution, fetch_html
+from capture.resolvers.codeberg import codeberg_repo, resolve_codeberg
 from capture.resolvers.default import (
     original_url,
     path_identity_domain,
     resolve_default,
 )
-from capture.resolvers.codeberg import codeberg_repo, resolve_codeberg
 from capture.resolvers.github import github_markdown, github_wiki, resolve_github
 from capture.resolvers.hackernews import (
     hackernews_item,
     hackernews_markdown,
     resolve_hackernews,
-)
-from capture.resolvers.substack import (
-    render_comments,
-    resolve_substack,
-)
-from capture.resolvers.reddit import (
-    reddit_comments,
-    reddit_markdown,
-    reddit_thread,
-    resolve_reddit,
 )
 from capture.resolvers.lesswrong import lesswrong_post, resolve_lesswrong
 from capture.resolvers.lobsters import (
@@ -39,13 +29,23 @@ from capture.resolvers.lobsters import (
 )
 from capture.resolvers.pastebin import pastebin_key, resolve_pastebin
 from capture.resolvers.pdf import resolve_pdf
+from capture.resolvers.reddit import (
+    reddit_comments,
+    reddit_markdown,
+    reddit_thread,
+    resolve_reddit,
+)
+from capture.resolvers.rumble import resolve_rumble, rumble_source
+from capture.resolvers.substack import (
+    render_comments,
+    resolve_substack,
+)
+from capture.resolvers.vimeo import resolve_vimeo, vimeo_id
 from capture.resolvers.wayback import (
     resolve_wayback,
     wayback_fallback,
     wayback_snapshot,
 )
-from capture.resolvers.rumble import resolve_rumble, rumble_source
-from capture.resolvers.vimeo import resolve_vimeo, vimeo_id
 from capture.resolvers.wikipedia import resolve_wikipedia, wikipedia_article
 from capture.resolvers.youtube import resolve_youtube, youtube_id
 

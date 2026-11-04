@@ -624,8 +624,8 @@ def test_github_repo_url_forms():
 
 
 def test_github_blob_markdown(monkeypatch):
-    import capture.resolvers.base as base
     import capture.resolvers as module
+    import capture.resolvers.base as base
 
     monkeypatch.setattr(base, "fetch_html", lambda u: "# CORDIC\n![d](img.png)")
     gh = module.github_markdown("https://github.com/o/r/blob/main/2024/5/10/cordic.md")
@@ -764,9 +764,10 @@ def test_fenced_outruns_backticks_inside():
 
 
 def test_gist_code_files_are_fenced(monkeypatch):
+    import json
+
     import capture.resolvers as module
     import capture.resolvers.base as base
-    import json
 
     api = {
         "description": "Tiny snake",
@@ -1583,8 +1584,8 @@ PASTEBIN_PAGE = """
 
 
 def test_pastebin_fences_text_paste(monkeypatch):
-    import capture.resolvers.base as base
     import capture.resolvers as module
+    import capture.resolvers.base as base
 
     fetched = {
         "https://pastebin.com/VLq4CpCT": PASTEBIN_PAGE,
@@ -1603,8 +1604,8 @@ def test_pastebin_fences_text_paste(monkeypatch):
 def test_pastebin_markdown_title_passes_through(monkeypatch):
     # pastebin.com/XuV4H9Zd: format "text", but the author titled it
     # PROJECT_MIND_MAPPING.md — the name declares markdown.
-    import capture.resolvers.base as base
     import capture.resolvers as module
+    import capture.resolvers.base as base
 
     page = PASTEBIN_PAGE.replace(
         "Mind Map for Coding Agents", "PROJECT_MIND_MAPPING.md"
@@ -1620,8 +1621,8 @@ def test_pastebin_markdown_title_passes_through(monkeypatch):
 
 
 def test_pastebin_guest_paste_keeps_bare_domain(monkeypatch):
-    import capture.resolvers.base as base
     import capture.resolvers as module
+    import capture.resolvers.base as base
 
     page = PASTEBIN_PAGE.replace('<a href="/u/Visarga">Visarga</a>', "a guest")
     monkeypatch.setattr(
