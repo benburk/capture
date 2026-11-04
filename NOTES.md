@@ -347,11 +347,9 @@ keeps working, but the reason for it in `vimeo_player` goes stale.
 
 ## Current fetcher matrix
 
-| Fetcher                  | Runs JS | Fingerprint                    | Role                                  |
-| ------------------------ | ------- | ------------------------------ | ------------------------------------- |
-| curl                     | no      | passes every WAF except ACM's  | identity HTML, archive.today artifact |
-| chromium via single-file | yes     | needs de-automation flags      | rendered archive, SPA fallback        |
-| pandoc's HTTP client     | no      | weakest; blocked by archive.is | URL conversion, image downloads       |
+- **curl:** runs JS: no. Fingerprint: passes every WAF except ACM's. Role: identity HTML, archive.today artifact.
+- **chromium via single-file:** runs JS: yes. Fingerprint: needs de-automation flags. Role: rendered archive, SPA fallback.
+- **pandoc's HTTP client:** runs JS: no. Fingerprint: weakest; blocked by archive.is. Role: URL conversion, image downloads.
 
 When every fetcher loses, the Wayback Machine's own crawl stands in
 (`wayback_fallback`), and after that a manual browser download via
