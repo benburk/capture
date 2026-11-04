@@ -1,5 +1,7 @@
-.claude/
 .env
+.direnv/
+.claude/worktrees/
+.claude/settings.local.json
 __pycache__/
 .venv/
 *.egg-info/

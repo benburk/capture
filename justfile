@@ -2,31 +2,35 @@
 default:
     just --list --unsorted
 
-# Install dependencies and set up the development environment
-bootstrap:
-    uv sync
-
 alias fmt := format
 
-# Format code
+# Set up a fresh checkout to run
+setup:
+    uv sync
+
+# Format the code and docs
 format:
+    just --fmt
+    ruff check --select I --fix .
     dprint fmt
-    fd -e nix | xargs -r nixfmt
+    fd -e nix -X nixfmt
     # The trailing `.` is required: with no path, ripgrep reads stdin when
     # stdin is not a TTY and blocks forever instead of searching the tree.
     rg -l '[^\n]\z' --multiline . | xargs -r sed -i -e '$a\\'
 
-# Run linters and static analysis
+# Check formatting and lint without changing files
 check:
+    just --fmt --check
     dprint check
-    ruff check .
+    @fd -e md --hidden -E .git -X awk '/^[[:space:]]*[|]/ && length($0) > 80 {print FILENAME ":" FNR ": table row is " length($0) " chars (>80)"; bad=1} END {exit bad}'
+    ruff check --extend-select I .
     pyright .
-    fd -e nix | xargs -r nixfmt --check
+    fd -e nix -X nixfmt --check
     ! rg -l '[^\n]\z' --multiline .
 
-# Run the test suite
+# Run the tests
 test:
-    pytest
+    uv run pytest
 
 # Corpus home: collected content, lives under /vault/media (see media/README.md)
 sites_dir := "/vault/media/sites"
